@@ -14,7 +14,7 @@
         h1, h2, h3 { text-align: center; color: var(--primary); margin-bottom: 15px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
         
-        /* Habit Fokus Styling korrigiert */
+        /* Habit Fokus Styling */
         .habit-input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
         .habit-input-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: -5px; }
         .habit-input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
@@ -57,8 +57,18 @@
         <h2>🎯 Atomic Habit Fokus</h2>
         <div id="habit-editor" style="display: none;">
             <div class="habit-input-group">
-                <label>Dein Ziel:</label>
+                <label>Dein Ziel (habitGoal):</label>
                 <input type="text" id="h-goal" placeholder="z.B. 10 Min. Dehnen">
+                
+                <label>Nach dieser Aktion (habitStacking):</label>
+                <input type="text" id="h-stack" placeholder="z.B. Zähneputzen">
+                
+                <label>2-Minuten-Version (habitMini):</label>
+                <input type="text" id="h-mini" placeholder="z.B. 2 Min. Dehnen">
+                
+                <label>Ort/Umgebung (habitEnvironment):</label>
+                <input type="text" id="h-env" placeholder="z.B. Wohnzimmerteppich">
+                
                 <label>Dauer (Tage):</label>
                 <input type="number" id="h-duration" value="60">
             </div>
@@ -69,6 +79,9 @@
             <div class="strategy-display">
                 <div class="countdown-badge" id="view-countdown">Tag 1</div>
                 <p><strong>Fokus:</strong> <span id="view-goal"></span></p>
+                <p><strong>Trigger:</strong> <span id="view-stack"></span></p>
+                <p><strong>Einstieg:</strong> <span id="view-mini"></span></p>
+                <p><strong>Umgebung:</strong> <span id="view-env"></span></p>
                 <p style="font-size: 0.8em; margin-top: 10px; color: var(--accent);"><i id="view-enddate"></i></p>
             </div>
             <div class="streak-container" id="streak-dots"></div>
@@ -107,7 +120,7 @@
 </div>
 
 <script>
-// Korrigierte Skalenbeschreibungen nach deinem Bild (Rechtschreibung korrigiert)
+// Kategorien und Beschreibungen basierend auf den Bildern mit korrigierter Rechtschreibung
 const categories = [
     { id: 'ern', name: 'Ernährung', steps: { 1: 'Sehr ungesund', 4: 'Eher ungesund (viel Gluten, viel Brot, wenig Gemüse)', 6: 'Gesund mit Einschränkungen', 8: 'Sehr gesund (viel Gemüse, kein Gluten)', 10: 'Optimal (viel Gemüse, vegetarisch, kein Gluten, keine Laktose)' } },
     { id: 'alk', name: 'Alkohol', steps: { 1: 'Exzess mit Kater', 2: '> 5 Bier/ Wein/ starker Alkohol', 4: '> 2 Bier/ Wein', 7: '1-2 Bier/ Wein', 10: '0,0 (Nichts)' } },
@@ -152,7 +165,15 @@ function lockHabit() {
     const duration = parseInt(document.getElementById('h-duration').value) || 60;
     const start = new Date(); const end = new Date();
     end.setDate(start.getDate() + duration - 1);
-    const h = { goal: document.getElementById('h-goal').value, startDate: start.toISOString().split('T')[0], endDate: end.toISOString().split('T')[0], duration: duration };
+    const h = { 
+        goal: document.getElementById('h-goal').value, 
+        stack: document.getElementById('h-stack').value,
+        mini: document.getElementById('h-mini').value,
+        env: document.getElementById('h-env').value,
+        startDate: start.toISOString().split('T')[0], 
+        endDate: end.toISOString().split('T')[0], 
+        duration: duration 
+    };
     localStorage.setItem('atomicHabit', JSON.stringify(h));
     fillHabitViewer(h);
     document.getElementById('habit-editor').style.display = 'none';
@@ -160,12 +181,23 @@ function lockHabit() {
 }
 
 function editHabit() {
+    // Wenn angepasst werden soll, fülle die Felder mit den aktuellen Werten vor
+    const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
+    document.getElementById('h-goal').value = h.goal || "";
+    document.getElementById('h-stack').value = h.stack || "";
+    document.getElementById('h-mini').value = h.mini || "";
+    document.getElementById('h-env').value = h.env || "";
+    document.getElementById('h-duration').value = h.duration || 60;
+
     document.getElementById('habit-editor').style.display = 'block';
     document.getElementById('habit-viewer').style.display = 'none';
 }
 
 function fillHabitViewer(h) {
     document.getElementById('view-goal').innerText = h.goal || "-";
+    document.getElementById('view-stack').innerText = h.stack || "-";
+    document.getElementById('view-mini').innerText = h.mini || "-";
+    document.getElementById('view-env').innerText = h.env || "-";
     const start = new Date(h.startDate); const today = new Date();
     const diffDays = Math.ceil(Math.abs(today - start) / (1000 * 60 * 60 * 24)) || 1;
     document.getElementById('view-countdown').innerText = `Tag ${diffDays} von ${h.duration}`;
@@ -174,7 +206,18 @@ function fillHabitViewer(h) {
 
 function saveAll() {
     const today = new Date().toISOString().split('T')[0];
-    const entry = { date: today, habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN", notes: document.getElementById('daily-notes').value };
+    const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
+    
+    const entry = { 
+        date: today, 
+        habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN", 
+        habitGoal: h.goal || "",
+        habitStacking: h.stack || "",
+        habitMini: h.mini || "",
+        habitEnvironment: h.env || "",
+        notes: document.getElementById('daily-notes').value 
+    };
+    
     document.querySelectorAll('#supp-box .chip').forEach(c => entry[c.dataset.id] = c.classList.contains('selected') ? "X" : "");
     categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
     
