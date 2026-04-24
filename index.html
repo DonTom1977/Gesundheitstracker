@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Heatmap Tracker</title>
+    <style>
+        :root { --primary: #2e7d32; --bg: #f0f2f5; --card: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; }
+        h1, h2 { text-align: center; color: var(--primary); }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        
+        /* Formular Styling */
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .grid-form { grid-template-columns: 1fr; } }
+        .category { padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        .cat-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; }
+        .desc { font-size: 0.85em; color: #666; min-height: 2.5em; line-height: 1.2; }
+        input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+
+        /* Heatmap Styling */
+        .heatmap-wrapper { overflow-x: auto; padding-bottom: 10px; }
+        .heatmap-table { border-collapse: separate; border-spacing: 4px; margin: auto; }
+        .heatmap-table th { font-size: 0.7em; font-weight: normal; color: #888; text-transform: uppercase; padding: 5px; }
+        .cell { width: 25px; height: 25px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); position: relative; }
+        .cell:hover::after {
+            content: attr(data-info); position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 5px; border-radius: 4px; font-size: 10px; white-space: nowrap; z-index: 10;
+        }
+        .row-label { font-size: 0.8em; text-align: right; padding-right: 10px; font-weight: bold; }
+
+        /* Buttons */
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-save { background: var(--primary); color: white; }
+        .btn-save:hover { background: #1b5e20; transform: translateY(-1px); }
+        .btn-export { background: #f0f0f0; color: #555; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌱 My Health Tracker</h1>
+
+    <div class="card">
+        <div class="grid-form" id="input-fields"></div>
+        <button class="btn btn-save" onclick="saveEntry()">Heutigen Tag speichern</button>
+    </div>
+
+    <div class="card">
+        <h2>Visualisierter Rückblick (14 Tage)</h2>
+        <div class="heatmap-wrapper" id="heatmap-container"></div>
+        <p style="font-size: 0.7em; color: #999; text-align: center; margin-top: 15px;">
+            Dunkelgrün = Top (9-10) | Gelb = Neutral (5-6) | Rot = Kritisch (1-2)
+        </p>
+    </div>
+
+    <button class="btn btn-export" onclick="exportCSV()">Alle Daten als CSV exportieren</button>
+</div>
+
+<script>
+const categories = [
+    { id: 'ern', name: 'Ernährung', steps: { 1: 'Fast Food', 5: 'Mischkost', 9: 'Frisch/Bio' } },
+    { id: 'alk', name: 'Alkohol', steps: { 1: 'Viel', 5: 'Mäßig', 9: 'Keiner' } },
+    { id: 'zuc', name: 'Zucker', steps: { 1: 'Viel', 5: 'Ein Dessert', 9: 'Keiner' } },
+    { id: 'spo', name: 'Sport', steps: { 1: 'Keiner', 5: 'Leicht', 9: 'Intensiv' } },
+    { id: 'sch', name: 'Schlaf', steps: { 1: '<4h', 5: '6-7h', 9: '>8h' } },
+    { id: 'ene', name: 'Energie', steps: { 1: 'Leer', 5: 'Okay', 9: 'Volle Power' } },
+    { id: 'men', name: 'Mental', steps: { 1: 'Stress', 5: 'Labil', 9: 'Glücklich' } },
+    { id: 'aut', name: 'Autoimmun', steps: { 1: 'Schub', 5: 'Leicht', 9: 'Beschwerdefrei' } },
+    { id: 'flu', name: 'Flüssigkeit', steps: { 1: '<1L', 5: '2L', 9: '>2.5L' } },
+    { id: 'bil', name: 'Bildschirm', steps: { 1: 'Exzessiv', 5: 'Viel', 9: 'Wenig/Bewusst' } }
+];
+
+function init() {
+    const container = document.getElementById('input-fields');
+    categories.forEach(cat => {
+        const div = document.createElement('div');
+        div.className = 'category';
+        div.innerHTML = `
+            <div class="cat-header"><span>${cat.name}</span><span id="v-${cat.id}">5</span></div>
+            <input type="range" id="i-${cat.id}" min="1" max="10" value="5" oninput="updateUI('${cat.id}')">
+            <div class="desc" id="d-${cat.id}">Mischkost / Okay</div>
+        `;
+        container.appendChild(div);
+    });
+    renderHeatmap();
+}
+
+function updateUI(id) {
+    const val = document.getElementById('i-' + id).value;
+    document.getElementById('v-' + id).innerText = val;
+    const cat = categories.find(c => c.id === id);
+    let text = val <= 3 ? cat.steps[1] : (val <= 7 ? cat.steps[5] : cat.steps[9]);
+    document.getElementById('d-' + id).innerText = text;
+}
+
+function getColor(val) {
+    if (!val) return '#ebedf0';
+    if (val <= 2) return '#f87171'; // Rot
+    if (val <= 4) return '#fbbf24'; // Orange
+    if (val <= 6) return '#fde047'; // Gelb
+    if (val <= 8) return '#a3e635'; // Hellgrün
+    return '#22c55e'; // Dunkelgrün
+}
+
+function saveEntry() {
+    const data = JSON.parse(localStorage.getItem('healthTrack') || '[]');
+    const today = new Date().toISOString().split('T')[0];
+    
+    const entry = { date: today };
+    categories.forEach(cat => {
+        entry[cat.name] = document.getElementById('i-' + cat.id).value;
+    });
+
+    const index = data.findIndex(d => d.date === today);
+    if (index > -1) data[index] = entry; else data.unshift(entry);
+    
+    localStorage.setItem('healthTrack', JSON.stringify(data));
+    renderHeatmap();
+    alert("Gespeichert!");
+}
+
+function renderHeatmap() {
+    const data = JSON.parse(localStorage.getItem('healthTrack') || '[]');
+    const container = document.getElementById('heatmap-container');
+    
+    // Letzte 14 Tage generieren
+    const dates = [];
+    for(let i=13; i>=0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        dates.push(d.toISOString().split('T')[0]);
+    }
+
+    let html = '<table class="heatmap-table"><tr><th></th>';
+    dates.forEach(d => html += `<th>${d.split('-')[2]}</th>`);
+    html += '</tr>';
+
+    categories.forEach(cat => {
+        html += `<tr><td class="row-label">${cat.name}</td>`;
+        dates.forEach(date => {
+            const dayData = data.find(entry => entry.date === date);
+            const val = dayData ? dayData[cat.name] : null;
+            const color = getColor(val);
+            html += `<td class="cell" style="background:${color}" data-info="${date}: ${val || 'Keine Daten'}"></td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</table>';
+    container.innerHTML = html;
+}
+
+function exportCSV() {
+    const data = JSON.parse(localStorage.getItem('healthTrack') || '[]');
+    if (data.length === 0) return alert("Keine Daten!");
+    const csv = [Object.keys(data[0]).join(";") , ...data.map(row => Object.values(row).join(";"))].join("\n");
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'health_export.csv');
+    a.click();
+}
+
+init();
+</script>
+</body>
+</html>
