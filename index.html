@@ -28,7 +28,7 @@
         .category { padding: 8px; border-bottom: 1px solid #f0f0f0; }
         .cat-header { display: flex; justify-content: space-between; font-weight: bold; }
         .score-box { background: #e8f5e9; color: var(--primary); padding: 2px 8px; border-radius: 5px; }
-        .desc-text { font-size: 0.75em; color: #666; font-style: italic; min-height: 1.2em; margin-top: 2px; }
+        .desc-text { font-size: 0.72em; color: #666; font-style: italic; min-height: 1.2em; margin-top: 2px; line-height: 1.2; }
         input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
 
         /* Chips */
@@ -65,7 +65,7 @@
             <input type="text" id="h-env" placeholder="Umgebung anpassen" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
             <label style="font-size: 0.8em; font-weight: bold; color: var(--accent);">Dauer des Habits (Tage):</label>
             <input type="number" id="h-duration" value="60" style="width:100%; margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:5px;">
-            <button class="btn" style="background:var(--accent); color:white;" onclick="lockHabit()">Plan für die Zukunft speichern</button>
+            <button class="btn" style="background:var(--accent); color:white;" onclick="lockHabit()">Plan speichern</button>
         </div>
         
         <div id="habit-viewer">
@@ -121,16 +121,16 @@
 
 <script>
 const categories = [
-    { id: 'ern', name: 'Ernährung', steps: { 1: 'Ungesund.', 5: 'Mischkost.', 9: 'Optimal.' } },
-    { id: 'alk', name: 'Alkohol', steps: { 1: 'Viel.', 5: 'Mäßig.', 9: 'Kein.' } },
-    { id: 'zuc', name: 'Zucker', steps: { 1: 'Viel.', 5: 'Wenig.', 9: 'Kein.' } },
-    { id: 'spo', name: 'Sport', steps: { 1: 'Keiner.', 5: '30-45m.', 9: '>60m.' } },
-    { id: 'sch', name: 'Schlaf', steps: { 1: '<4h.', 5: '6-7h.', 9: '>8h.' } },
-    { id: 'med', name: 'Meditation', steps: { 1: 'Keine.', 5: '5-10m.', 9: '>20m.' } },
-    { id: 'ene', name: 'Energie', steps: { 1: 'Erschöpft.', 5: 'Ok.', 9: 'Power.' } },
-    { id: 'men', name: 'Mental', steps: { 1: 'Schlecht.', 5: 'Labil.', 9: 'Top.' } },
-    { id: 'fas', name: 'Fasten', steps: { 1: 'Nein.', 5: 'Fast.', 9: 'Ja.' } },
-    { id: 'aut', name: 'Autoimmun', steps: { 1: 'Schub.', 5: 'Spürbar.', 9: 'Ruhe.' } }
+    { id: 'ern', name: 'Ernährung', steps: { 1: 'Junk Food', 3: 'Ungesund', 5: 'Mischkost (Kantine)', 7: 'Gut (kl. Fehler)', 8: 'Gesund (kaum Ausnahmen)', 10: 'Optimal (0 Sünden)' } },
+    { id: 'alk', name: 'Alkohol', steps: { 1: 'Exzess', 3: 'Viel / Harter Alk', 5: '3 Gläser (Mäßig)', 7: '1 gr. Glas (0,2/0,5)', 8: '1 kl. Glas (0,1/0,3)', 10: '0,0 (Nichts)' } },
+    { id: 'zuc', name: 'Zucker', steps: { 1: 'Overkill', 3: 'Viel (Schokolade)', 5: 'Nachtisch', 7: '1 Keks / wenig', 8: 'Minimal', 10: '0% (Clean)' } },
+    { id: 'spo', name: 'Sport', steps: { 1: 'Keine', 3: 'Alltagsbewegung', 5: '20-30m', 7: '45-60m', 9: '75-90m', 10: '>90m (Power)' } },
+    { id: 'sch', name: 'Schlaf', steps: { 1: '<4h (Gerädert)', 3: '5-5,5h', 5: '6-6,5h', 7: '7-7,5h', 8: '7,5-8h', 10: '>8,5h (Top)' } },
+    { id: 'med', name: 'Meditation', steps: { 1: 'Keine', 4: '1m (Atmen)', 5: '2-5m', 7: '10-15m', 9: '20-30m', 10: '>30m' } },
+    { id: 'ene', name: 'Energie', steps: { 1: 'Burnout-Gefühl', 3: 'Erschöpft', 5: 'Ok (Durchschnitt)', 7: 'Gut', 9: 'Sehr wach', 10: 'Peak (Bäume ausreißen)' } },
+    { id: 'men', name: 'Mental', steps: { 1: 'Sehr schlecht', 3: 'Gestresst', 5: 'Labil (Ok)', 7: 'Stabil', 9: 'Motiviert', 10: 'Zen (Glücklich)' } },
+    { id: 'fas', name: 'Fasten', steps: { 1: 'Daueressen', 3: 'Kaum Pausen', 5: 'Viel gesnackt', 7: 'Fenster verkürzt', 9: 'Ziel erreicht (16h)', 10: 'Ziel+ (z.B. 18h)' } },
+    { id: 'aut', name: 'Autoimmun', steps: { 1: 'Akuter Schub', 3: 'Schmerzhaft', 5: 'Mäßig (Spürbar)', 7: 'Spürbar', 9: 'Fast nichts', 10: 'Ruhe (Keine Symptome)' } }
 ];
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA223vOvb5Q-8NUQdCm-pdEaG0NyN-fFeD3z9MxO9AXG6uln43yL66fv6GGemAVNZs/exec";
@@ -141,8 +141,9 @@ function init() {
         container.innerHTML += `<div class="category">
             <div class="cat-header"><span>${cat.name}</span><span class="score-box" id="v-${cat.id}">5</span></div>
             <input type="range" id="i-${cat.id}" min="1" max="10" value="5" oninput="updateUI('${cat.id}')">
-            <div class="desc-text" id="d-${cat.id}">${cat.steps[5]}</div>
+            <div class="desc-text" id="d-${cat.id}">Lade...</div>
         </div>`;
+        updateUI(cat.id);
     });
     checkHabitExpiration();
     const h = JSON.parse(localStorage.getItem('atomicHabit'));
@@ -151,22 +152,22 @@ function init() {
 }
 
 function updateUI(id) {
-    const val = document.getElementById('i-' + id).value;
+    const val = parseInt(document.getElementById('i-' + id).value);
     document.getElementById('v-' + id).innerText = val;
     const cat = categories.find(c => c.id === id);
-    const step = val <= 3 ? 1 : (val <= 7 ? 5 : 9);
-    document.getElementById('d-' + id).innerText = cat.steps[step];
+    
+    // Sucht die höchste Beschreibung, die kleiner oder gleich dem aktuellen Wert ist
+    let bestMatch = "";
+    const sortedKeys = Object.keys(cat.steps).map(Number).sort((a, b) => a - b);
+    for (let key of sortedKeys) {
+        if (val >= key) bestMatch = cat.steps[key];
+    }
+    document.getElementById('d-' + id).innerText = bestMatch;
 }
 
 function checkHabitExpiration() {
     const h = JSON.parse(localStorage.getItem('atomicHabit'));
-    if (h && h.endDate) {
-        const today = new Date();
-        const end = new Date(h.endDate);
-        if (today > end) {
-            localStorage.removeItem('atomicHabit');
-        }
-    }
+    if (h && h.endDate && new Date() > new Date(h.endDate)) localStorage.removeItem('atomicHabit');
 }
 
 function selectSingle(el) {
@@ -176,18 +177,12 @@ function selectSingle(el) {
 
 function lockHabit() {
     const duration = parseInt(document.getElementById('h-duration').value) || 60;
-    const start = new Date();
-    const end = new Date();
+    const start = new Date(); const end = new Date();
     end.setDate(start.getDate() + duration - 1);
-
     const h = { 
-        goal: document.getElementById('h-goal').value, 
-        stack: document.getElementById('h-stack').value, 
-        mini: document.getElementById('h-mini').value, 
-        env: document.getElementById('h-env').value,
-        startDate: start.toISOString().split('T')[0],
-        endDate: end.toISOString().split('T')[0],
-        duration: duration
+        goal: document.getElementById('h-goal').value, stack: document.getElementById('h-stack').value, 
+        mini: document.getElementById('h-mini').value, env: document.getElementById('h-env').value,
+        startDate: start.toISOString().split('T')[0], endDate: end.toISOString().split('T')[0], duration: duration
     };
     localStorage.setItem('atomicHabit', JSON.stringify(h));
     fillHabitViewer(h);
@@ -205,12 +200,8 @@ function fillHabitViewer(h) {
     document.getElementById('view-stack').innerText = h.stack || "-";
     document.getElementById('view-mini').innerText = h.mini || "-";
     document.getElementById('view-env').innerText = h.env || "-";
-    
-    const start = new Date(h.startDate);
-    const today = new Date();
-    const diffTime = Math.abs(today - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-    
+    const start = new Date(h.startDate); const today = new Date();
+    const diffDays = Math.ceil(Math.abs(today - start) / (1000 * 60 * 60 * 24)) || 1;
     document.getElementById('view-countdown').innerText = `Tag ${diffDays} von ${h.duration}`;
     document.getElementById('view-enddate').innerText = `Zieltag: ${new Date(h.endDate).toLocaleDateString('de-DE')} (noch ${h.duration - diffDays} Tage)`;
 }
@@ -224,15 +215,12 @@ function saveAll() {
         notes: document.getElementById('daily-notes').value,
         krank: document.querySelector('#krank-box .chip.selected')?.dataset.val || "nein"
     };
-
     document.querySelectorAll('#supp-box .chip').forEach(c => entry[c.dataset.id] = c.classList.contains('selected') ? "X" : "");
     categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
-
     let local = JSON.parse(localStorage.getItem('healthTrack') || '[]');
     const idx = local.findIndex(d => d.date === today);
     if(idx > -1) local[idx] = entry; else local.unshift(entry);
     localStorage.setItem('healthTrack', JSON.stringify(local));
-
     fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) })
     .then(() => { alert("Gespeichert!"); renderHabitStreak(); renderHeatmap(); })
     .catch(() => alert("Sync Fehler"));
