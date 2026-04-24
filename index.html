@@ -13,39 +13,26 @@
         .container { max-width: 800px; margin: auto; }
         h1, h2, h3 { text-align: center; color: var(--primary); margin-bottom: 15px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        
-        /* Habit Strategy & Countdown */
         .strategy-display { background: #e3f2fd; padding: 15px; border-radius: 10px; border-left: 5px solid var(--accent); margin-bottom: 15px; font-size: 0.9em; position: relative; }
         .countdown-badge { position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 0.8em; }
         .streak-container { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
         .dot { width: 18px; height: 18px; border-radius: 50%; background: #eee; border: 1px solid #ddd; }
         .dot.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 5px rgba(46,125,50,0.3); }
         .dot.today { border: 2px solid #333; transform: scale(1.1); }
-
-        /* Formular */
         .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 650px) { .grid-form { grid-template-columns: 1fr; } }
         .category { padding: 8px; border-bottom: 1px solid #f0f0f0; }
         .cat-header { display: flex; justify-content: space-between; font-weight: bold; }
         .score-box { background: #e8f5e9; color: var(--primary); padding: 2px 8px; border-radius: 5px; }
-        .desc-text { font-size: 0.72em; color: #666; font-style: italic; min-height: 1.2em; margin-top: 2px; line-height: 1.2; }
+        .desc-text { font-size: 0.72em; color: #555; font-style: italic; min-height: 2.5em; margin-top: 2px; line-height: 1.25; }
         input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
-
-        /* Chips */
         .chip-group { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; }
         .chip { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.85em; cursor: pointer; background: #fff; transition: 0.2s; user-select: none; }
-        .chip.selected[data-type="supp"] { background: var(--primary); color: white; border-color: var(--primary); }
-        .chip[data-val="nein"].selected { background: #81c784; color: white; border-color: #81c784; }
-        .chip[data-val="angeschlagen"].selected { background: var(--warn); color: white; border-color: var(--warn); }
-        .chip[data-val="ja"].selected { background: var(--danger); color: white; border-color: var(--danger); }
-
+        .chip.selected { background: var(--primary); color: white; border-color: var(--primary); }
         textarea { width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; font-family: inherit; margin-top: 10px; box-sizing: border-box; resize: vertical; }
         .habit-success-area { background: #f1f8e9; border: 2px dashed var(--primary); padding: 20px; border-radius: 12px; text-align: center; margin: 15px 0; cursor: pointer; }
-        .habit-success-area input { transform: scale(1.8); margin-right: 15px; }
-
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-save { background: var(--primary); color: white; margin-top: 10px; box-shadow: 0 4px 10px rgba(46,125,50,0.3); }
-        
         .heatmap-wrapper { overflow-x: auto; padding: 10px 0; }
         .heatmap-table { border-collapse: separate; border-spacing: 3px; margin: auto; }
         .cell { width: 18px; height: 18px; border-radius: 3px; }
@@ -59,15 +46,14 @@
     <div class="card">
         <h2>🎯 Atomic Habit Fokus</h2>
         <div id="habit-editor" style="display: none;">
-            <input type="text" id="h-goal" placeholder="Ziel (z.B. 10 Min. Dehnen)" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
-            <input type="text" id="h-stack" placeholder="Trigger (Nachdem ich...)" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
+            <input type="text" id="h-goal" placeholder="Ziel" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
+            <input type="text" id="h-stack" placeholder="Trigger" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
             <input type="text" id="h-mini" placeholder="2-Minuten-Version" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
-            <input type="text" id="h-env" placeholder="Umgebung anpassen" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
-            <label style="font-size: 0.8em; font-weight: bold; color: var(--accent);">Dauer des Habits (Tage):</label>
+            <input type="text" id="h-env" placeholder="Umgebung" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
+            <label style="font-size: 0.8em; font-weight: bold;">Dauer (Tage):</label>
             <input type="number" id="h-duration" value="60" style="width:100%; margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:5px;">
-            <button class="btn" style="background:var(--accent); color:white;" onclick="lockHabit()">Plan speichern</button>
+            <button class="btn" style="background:var(--accent); color:white;" onclick="lockHabit()">Speichern</button>
         </div>
-        
         <div id="habit-viewer">
             <div class="strategy-display">
                 <div class="countdown-badge" id="view-countdown">Tag 1</div>
@@ -84,32 +70,21 @@
 
     <div class="card">
         <div class="grid-form" id="input-fields"></div>
-        
         <h3 style="margin-top:25px;">💊 Nahrungsergänzung & Meds</h3>
         <div class="chip-group" id="supp-box">
-            <div class="chip" onclick="this.classList.toggle('selected')" data-type="supp" data-id="bKomplex">B-Komplex</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-type="supp" data-id="d3k2">D3/K2</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-type="supp" data-id="omega3">Omega3</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-type="supp" data-id="magnesium">Magnesium</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-type="supp" data-id="jod">Jod</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-type="supp" data-id="zink">Zink</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-type="supp" data-id="budesonid" style="border-color:var(--danger)">Budesonid</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-type="supp" data-id="ibu" style="border-color:var(--danger)">Ibu</div>
+            <div class="chip" onclick="this.classList.toggle('selected')" data-id="bKomplex">B-Komplex</div>
+            <div class="chip" onclick="this.classList.toggle('selected')" data-id="d3k2">D3/K2</div>
+            <div class="chip" onclick="this.classList.toggle('selected')" data-id="omega3">Omega3</div>
+            <div class="chip" onclick="this.classList.toggle('selected')" data-id="magnesium">Magnesium</div>
+            <div class="chip" onclick="this.classList.toggle('selected')" data-id="jod">Jod</div>
+            <div class="chip" onclick="this.classList.toggle('selected')" data-id="zink">Zink</div>
+            <div class="chip" onclick="this.classList.toggle('selected')" data-id="budesonid" style="border-color:var(--danger)">Budesonid</div>
+            <div class="chip" onclick="this.classList.toggle('selected')" data-id="ibu" style="border-color:var(--danger)">Ibu</div>
         </div>
-
-        <h3>🤒 Krankheits-Status</h3>
-        <div class="chip-group" id="krank-box">
-            <div class="chip" onclick="selectSingle(this)" data-val="nein">Nein</div>
-            <div class="chip" onclick="selectSingle(this)" data-val="angeschlagen">Angeschlagen</div>
-            <div class="chip" onclick="selectSingle(this)" data-val="ja">Ja (Krank)</div>
-        </div>
-
         <div class="habit-success-area" onclick="document.getElementById('habit-check').click()">
-            <input type="checkbox" id="habit-check">
-            <span>HABIT GEWONNEN! 🏆</span>
+            <input type="checkbox" id="habit-check"> <span>HABIT GEWONNEN! 🏆</span>
         </div>
-
-        <textarea id="daily-notes" rows="3" placeholder="Besonderheiten, Symptome, Notizen..."></textarea>
+        <textarea id="daily-notes" rows="3" placeholder="Notizen..."></textarea>
         <button class="btn btn-save" onclick="saveAll()">Speichern & Cloud Sync</button>
     </div>
 
@@ -121,16 +96,16 @@
 
 <script>
 const categories = [
-    { id: 'ern', name: 'Ernährung', steps: { 1: 'Junk Food', 3: 'Ungesund', 5: 'Mischkost (Kantine)', 7: 'Gut (kl. Fehler)', 8: 'Gesund (kaum Ausnahmen)', 10: 'Optimal (0 Sünden)' } },
-    { id: 'alk', name: 'Alkohol', steps: { 1: 'Exzess', 3: 'Viel / Harter Alk', 5: '3 Gläser (Mäßig)', 7: '1 gr. Glas (0,2/0,5)', 8: '1 kl. Glas (0,1/0,3)', 10: '0,0 (Nichts)' } },
-    { id: 'zuc', name: 'Zucker', steps: { 1: 'Overkill', 3: 'Viel (Schokolade)', 5: 'Nachtisch', 7: '1 Keks / wenig', 8: 'Minimal', 10: '0% (Clean)' } },
-    { id: 'spo', name: 'Sport', steps: { 1: 'Keine', 3: 'Alltagsbewegung', 5: '20-30m', 7: '45-60m', 9: '75-90m', 10: '>90m (Power)' } },
-    { id: 'sch', name: 'Schlaf', steps: { 1: '<4h (Gerädert)', 3: '5-5,5h', 5: '6-6,5h', 7: '7-7,5h', 8: '7,5-8h', 10: '>8,5h (Top)' } },
-    { id: 'med', name: 'Meditation', steps: { 1: 'Keine', 4: '1m (Atmen)', 5: '2-5m', 7: '10-15m', 9: '20-30m', 10: '>30m' } },
-    { id: 'ene', name: 'Energie', steps: { 1: 'Burnout-Gefühl', 3: 'Erschöpft', 5: 'Ok (Durchschnitt)', 7: 'Gut', 9: 'Sehr wach', 10: 'Peak (Bäume ausreißen)' } },
-    { id: 'men', name: 'Mental', steps: { 1: 'Sehr schlecht', 3: 'Gestresst', 5: 'Labil (Ok)', 7: 'Stabil', 9: 'Motiviert', 10: 'Zen (Glücklich)' } },
-    { id: 'fas', name: 'Fasten', steps: { 1: 'Daueressen', 3: 'Kaum Pausen', 5: 'Viel gesnackt', 7: 'Fenster verkürzt', 9: 'Ziel erreicht (16h)', 10: 'Ziel+ (z.B. 18h)' } },
-    { id: 'aut', name: 'Autoimmun', steps: { 1: 'Akuter Schub', 3: 'Schmerzhaft', 5: 'Mäßig (Spürbar)', 7: 'Spürbar', 9: 'Fast nichts', 10: 'Ruhe (Keine Symptome)' } }
+    { id: 'ern', name: 'Ernährung', steps: { 1: 'Sehr ungesund', 4: 'Eher ungesund (viel Gluten, viel Brot, wenig Gemüse)', 6: 'Gesund mit Einschränkungen', 8: 'sehr gesund (viel Gemüse, kein Gluten)', 10: 'optimal (viel Gemüse, vegetarisch, kein Gluten, keine Laktose)' } },
+    { id: 'alk', name: 'Alkohol', steps: { 1: 'Exzess mit Kater', 2: '> 5 Bier/ Wein/ starker Aklohol', 4: '>2 Bier/ Wein', 7: '1-2 Bier/ Wein', 10: '0,0 (Nichts)' } },
+    { id: 'zuc', name: 'Zucker', steps: { 1: 'Overkill', 4: 'viel Zucker (Fruchtzucker und industrieller Zucker)', 6: 'wenig Zucker (ggf etwas industrieller Zucker)', 8: 'sehr wenig Zucker', 10: '0,0 (kein industrieller Zucker und sehr wenig Fruchtzucker)' } },
+    { id: 'spo', name: 'Sport', steps: { 1: 'Kein Sport und nur am Schreibtisch', 3: 'Nur Alltagsbewegung', 5: 'Kein Sport, aber viel Bewegung', 8: 'Sport (nur aerober Anteil)', 10: 'Intensiver Sport (mit aneroben Anteil)' } },
+    { id: 'sch', name: 'Schlaf', steps: { 1: '<6 Stunden guter Schlaf mit Unterbrechungen', 3: '<7 Stunden guter Schlaf mit Unterbrechungen', 5: 'Ca. 7 Stunden guter Schlaf, aber mit Unterbrechungen', 7: 'Ca. 7 Stunden guter, ununterbrochener Schlaf', 10: '> 8 Stunden guter, ununterbrochener Schlaf' } },
+    { id: 'med', name: 'Meditation', steps: { 1: 'Keine', 4: 'Ca 10 Minuten Meditation oder innerliche Ruge/ Ahctsamkeit mit wenigen oder keinen Unterbrechungen', 7: '15 Minuten Meditation mit wenigen oder keinen Unterbrechungen', 10: '> 20 Minuten Meditation ohne Unterbrechungen' } },
+    { id: 'ene', name: 'Energie', steps: { 1: 'Burnout-Gefühl', 3: 'Sehr müde und erschöpft', 4: 'Leicht müde und etwas erschöpft', 6: 'Ok (Durchschnitt, etwas müde)', 8: 'Leicht über Durchschnitt und aktiv', 10: 'Peak (Bäume ausreißen)' } },
+    { id: 'men', name: 'Mental', steps: { 1: 'Sehr schlecht bis hin zu depressive Züge', 2: 'Trübe Gedanken', 3: 'Gestresst', 4: 'Angespannt bis labil', 6: 'Ausgeglichen und stabil', 8: 'Motiviert', 10: 'Zen (Glücklich)' } },
+    { id: 'fas', name: 'Fasten', steps: { 1: 'Daueressen', 3: 'Kein Fasten, aber normale Mahlzeiten (mit Snacken)', 5: 'Kein Fasten, aber normale Mahlzeiten (ohne Snacken)', 8: '14:10', 10: '16:08' } },
+    { id: 'aut', name: 'Autoimmun', steps: { 1: 'Darmprobleme, Antriebslos und weitere Schübe', 3: 'Mehr als 1 Symptom (Haare, Darm, etc.)', 5: '1 Symptom aber kaum spürbar', 10: 'Ruhe (Keine Symptome)' } }
 ];
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA223vOvb5Q-8NUQdCm-pdEaG0NyN-fFeD3z9MxO9AXG6uln43yL66fv6GGemAVNZs/exec";
@@ -155,13 +130,9 @@ function updateUI(id) {
     const val = parseInt(document.getElementById('i-' + id).value);
     document.getElementById('v-' + id).innerText = val;
     const cat = categories.find(c => c.id === id);
-    
-    // Sucht die höchste Beschreibung, die kleiner oder gleich dem aktuellen Wert ist
     let bestMatch = "";
     const sortedKeys = Object.keys(cat.steps).map(Number).sort((a, b) => a - b);
-    for (let key of sortedKeys) {
-        if (val >= key) bestMatch = cat.steps[key];
-    }
+    for (let key of sortedKeys) { if (val >= key) bestMatch = cat.steps[key]; }
     document.getElementById('d-' + id).innerText = bestMatch;
 }
 
@@ -170,20 +141,11 @@ function checkHabitExpiration() {
     if (h && h.endDate && new Date() > new Date(h.endDate)) localStorage.removeItem('atomicHabit');
 }
 
-function selectSingle(el) {
-    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-}
-
 function lockHabit() {
     const duration = parseInt(document.getElementById('h-duration').value) || 60;
     const start = new Date(); const end = new Date();
     end.setDate(start.getDate() + duration - 1);
-    const h = { 
-        goal: document.getElementById('h-goal').value, stack: document.getElementById('h-stack').value, 
-        mini: document.getElementById('h-mini').value, env: document.getElementById('h-env').value,
-        startDate: start.toISOString().split('T')[0], endDate: end.toISOString().split('T')[0], duration: duration
-    };
+    const h = { goal: document.getElementById('h-goal').value, stack: document.getElementById('h-stack').value, mini: document.getElementById('h-mini').value, env: document.getElementById('h-env').value, startDate: start.toISOString().split('T')[0], endDate: end.toISOString().split('T')[0], duration: duration };
     localStorage.setItem('atomicHabit', JSON.stringify(h));
     fillHabitViewer(h);
     document.getElementById('habit-editor').style.display = 'none';
@@ -209,21 +171,14 @@ function fillHabitViewer(h) {
 function saveAll() {
     const today = new Date().toISOString().split('T')[0];
     const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
-    const entry = { 
-        date: today, habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN",
-        habitGoal: h.goal, habitStacking: h.stack, habitMini: h.mini, habitEnvironment: h.env,
-        notes: document.getElementById('daily-notes').value,
-        krank: document.querySelector('#krank-box .chip.selected')?.dataset.val || "nein"
-    };
+    const entry = { date: today, habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN", habitGoal: h.goal, notes: document.getElementById('daily-notes').value };
     document.querySelectorAll('#supp-box .chip').forEach(c => entry[c.dataset.id] = c.classList.contains('selected') ? "X" : "");
     categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
     let local = JSON.parse(localStorage.getItem('healthTrack') || '[]');
     const idx = local.findIndex(d => d.date === today);
     if(idx > -1) local[idx] = entry; else local.unshift(entry);
     localStorage.setItem('healthTrack', JSON.stringify(local));
-    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) })
-    .then(() => { alert("Gespeichert!"); renderHabitStreak(); renderHeatmap(); })
-    .catch(() => alert("Sync Fehler"));
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) }).then(() => { alert("Gespeichert!"); renderHabitStreak(); renderHeatmap(); });
 }
 
 function renderHabitStreak() {
@@ -257,7 +212,6 @@ function renderHeatmap() {
     });
     container.innerHTML = html + '</table>';
 }
-
 init();
 </script>
 </body>
