@@ -73,6 +73,7 @@
                 <div class="countdown-badge" id="view-countdown">Tag 1</div>
                 <p><strong>Fokus:</strong> <span id="view-goal"></span></p>
                 <p><strong>Trigger:</strong> <span id="view-stack"></span></p>
+                <p><strong>Mini-Version:</strong> <span id="view-mini"></span></p>
             </div>
             <button onclick="editHabit()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.85em; width:100%;">➔ Plan anpassen</button>
         </div>
@@ -114,7 +115,7 @@
         </div>
 
         <textarea id="daily-notes" rows="3" placeholder="Notizen..."></textarea>
-        <button class="btn btn-save" onclick="">Speichern für Gestern</button>
+        <button class="btn btn-save" onclick="saveAll()">Speichern für Gestern</button>
     </div>
 </div>
 
@@ -129,10 +130,10 @@ const categories = [
     { id: 'zuc', name: 'Zucker', steps: { 1: 'Overkill', 4: 'Viel Zucker (Fruchtzucker und industrieller Zucker)', 6: 'Wenig Zucker (ggf. etwas industrieller Zucker)', 8: 'Sehr wenig Zucker', 10: '0,0 (kein industrieller Zucker und sehr wenig Fruchtzucker)' } },
     { id: 'spo', name: 'Sport', steps: { 1: 'Kein Sport und nur am Schreibtisch', 3: 'Nur Alltagsbewegung', 5: 'Kein Sport, aber viel Bewegung', 8: 'Sport (nur aerober Anteil)', 10: 'Intensiver Sport (mit anaerobem Anteil)' } },
     { id: 'sch', name: 'Schlaf', steps: { 1: '< 6 Stunden guter Schlaf mit Unterbrechungen', 3: '< 7 Stunden guter Schlaf mit Unterbrechungen', 5: 'Ca. 7 Stunden guter Schlaf, aber mit Unterbrechungen', 7: 'Ca. 7 Stunden guter, ununterbrochener Schlaf', 10: '> 8 Stunden guter, ununterbrochener Schlaf' } },
-    { id: 'med', name: 'Meditation', steps: { 1: 'Keine', 4: 'Ca. 10 Minuten Meditation oder innerliche Ruhe/ Achtsamkeit mit wenigen oder keinen Unterbrechungen', 7: '15 Minuten Meditation mit wenigen oder keinen Unterbrechungen', 10: '> 20 Minuten Meditation ohne Unterbrechungen' } },
-    { id: 'ene', name: 'Energie', steps: { 1: 'Burnout-Gefühl', 3: 'Sehr müde und erschöpft', 4: 'Leicht müde und etwas erschöpft', 6: 'Ok (Durchschnitt, etwas müde)', 8: 'Leicht über Durchschnitt und aktiv', 10: 'Peak (Bäume ausreißen)' } },
-    { id: 'men', name: 'Mental', steps: { 1: 'Sehr schlecht bis hin zu depressiven Zügen', 2: 'Trübe Gedanken', 3: 'Gestresst', 4: 'Angespannt bis labil', 6: 'Ausgeglichen und stabil', 8: 'Motiviert', 10: 'Zen (Glücklich)' } },
-    { id: 'fas', name: 'Fasten', steps: { 1: 'Daueressen', 3: 'Kein Fasten, aber normale Mahlzeiten (mit Snacken)', 5: 'Kein Fasten, aber normale Mahlzeiten (ohne Snacken)', 8: '14:10', 10: '16:08' } }
+    { id: 'med', name: 'Meditation', steps: { 1: 'Keine', 4: 'Ca. 10 Minuten Meditation oder Achtsamkeit', 7: '15 Minuten Meditation', 10: '> 20 Minuten Meditation' } },
+    { id: 'ene', name: 'Energie', steps: { 1: 'Burnout-Gefühl', 3: 'Sehr müde', 4: 'Leicht müde', 6: 'Ok (Durchschnitt)', 8: 'Aktiv', 10: 'Peak' } },
+    { id: 'men', name: 'Mental', steps: { 1: 'Sehr schlecht', 2: 'Trübe Gedanken', 3: 'Gestresst', 4: 'Labil', 6: 'Stabil', 8: 'Motiviert', 10: 'Zen (Glücklich)' } },
+    { id: 'fas', name: 'Fasten', steps: { 1: 'Daueressen', 3: 'Kein Fasten (mit Snacken)', 5: 'Kein Fasten (ohne Snacken)', 8: '14:10', 10: '16:08' } }
 ];
 
 function init() {
@@ -175,7 +176,14 @@ function updateUI(id) {
 
 function lockHabit() {
     const start = new Date(); const dur = parseInt(document.getElementById('h-duration').value) || 60;
-    const h = { goal: document.getElementById('h-goal').value, stack: document.getElementById('h-stack').value, mini: document.getElementById('h-mini').value, env: document.getElementById('h-env').value, startDate: start.toISOString().split('T')[0], duration: dur };
+    const h = { 
+        goal: document.getElementById('h-goal').value, 
+        stack: document.getElementById('h-stack').value, 
+        mini: document.getElementById('h-mini').value, 
+        env: document.getElementById('h-env').value, 
+        startDate: start.toISOString().split('T')[0], 
+        duration: dur 
+    };
     localStorage.setItem('atomicHabit', JSON.stringify(h));
     fillHabitViewer(h);
     document.getElementById('habit-editor').style.display = 'none';
@@ -190,49 +198,40 @@ function editHabit() {
 function fillHabitViewer(h) {
     document.getElementById('view-goal').innerText = h.goal || "-";
     document.getElementById('view-stack').innerText = h.stack || "-";
+    document.getElementById('view-mini').innerText = h.mini || "-";
     const start = new Date(h.startDate);
     const diff = Math.ceil(Math.abs(new Date() - start) / (1000 * 60 * 60 * 24)) || 1;
     document.getElementById('view-countdown').innerText = `Tag ${diff} von ${h.duration}`;
 }
 
 function saveAll() {
-    const dateObj = new Date(); 
-    dateObj.setDate(dateObj.getDate() - 1);
+    const dateObj = new Date(); dateObj.setDate(dateObj.getDate() - 1);
     const targetDate = dateObj.toLocaleDateString('de-DE');
-    
-    // Wir holen uns den kompletten Plan aus dem Speicher
     const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
 
-    // Hier fügen wir die fehlenden Felder hinzu:
+    // Das gesamte Paket für das Google Sheet
     const entry = { 
         date: targetDate, 
         krankheitsStatus: currentStatus,
         autoimmunStatus: currentAutoimmun,
         habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN",
         wakeupUebungen: document.getElementById('wakeup-check').checked ? "JA" : "NEIN",
-        
-        // Diese Namen müssen exakt so in deinem Worksheet oben stehen:
         habitGoal: h.goal || "",
         habitStacking: h.stack || "",
         habitMini: h.mini || "",
         habitEnvironment: h.env || "",
-        
         notes: document.getElementById('daily-notes').value 
     };
     
+    // Supplements
     document.querySelectorAll('#supp-box .chip').forEach(c => entry[c.dataset.id] = c.classList.contains('selected') ? "X" : "");
+    // Slider-Kategorien
     categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
     
     fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) })
-    .then(() => alert("Gespeichert für gestern (" + targetDate + ")"));
-};
-    
-    document.querySelectorAll('#supp-box .chip').forEach(c => entry[c.dataset.id] = c.classList.contains('selected') ? "X" : "");
-    categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
-    
-    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) })
-    .then(() => alert("Gespeichert für gestern (" + targetDate + ")"));
+    .then(() => alert("Erfolgreich für gestern (" + targetDate + ") gespeichert!"));
 }
+
 init();
 </script>
 </body>
