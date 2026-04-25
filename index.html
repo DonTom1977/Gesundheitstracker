@@ -14,20 +14,16 @@
         h1, h2, h3 { text-align: center; color: var(--primary); margin-bottom: 15px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
         
-        /* Habit Fokus Styling */
         .habit-input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
         .habit-input-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: -5px; }
         .habit-input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
         
         .strategy-display { background: #e3f2fd; padding: 15px; border-radius: 10px; border-left: 5px solid var(--accent); margin-bottom: 15px; font-size: 0.9em; position: relative; }
         .countdown-badge { position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; padding: 4px 10px; border-radius: 10px; font-weight: bold; font-size: 0.8em; }
-        .streak-container { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
-        .dot { width: 18px; height: 18px; border-radius: 50%; background: #eee; border: 1px solid #ddd; }
-        .dot.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 5px rgba(46,125,50,0.3); }
-        .dot.today { border: 2px solid #333; transform: scale(1.1); }
-
+        
         .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 650px) { .grid-form { grid-template-columns: 1fr; } }
+        
         .category { padding: 8px; border-bottom: 1px solid #f0f0f0; }
         .cat-header { display: flex; justify-content: space-between; font-weight: bold; }
         .score-box { background: #e8f5e9; color: var(--primary); padding: 2px 8px; border-radius: 5px; }
@@ -38,60 +34,63 @@
         .chip { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.85em; cursor: pointer; background: #fff; transition: 0.2s; user-select: none; }
         .chip.selected { background: var(--primary); color: white; border-color: var(--primary); }
         
-        textarea { width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; font-family: inherit; margin-top: 10px; box-sizing: border-box; resize: vertical; }
-        .habit-success-area { background: #f1f8e9; border: 2px dashed var(--primary); padding: 20px; border-radius: 12px; text-align: center; margin: 15px 0; cursor: pointer; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-save { background: var(--primary); color: white; margin-top: 10px; box-shadow: 0 4px 10px rgba(46,125,50,0.3); }
+        /* Krankheits-Status Farben */
+        .chip.status-gesund.selected { background: var(--primary); }
+        .chip.status-angeschlagen.selected { background: var(--warn); border-color: var(--warn); }
+        .chip.status-krank.selected { background: var(--danger); border-color: var(--danger); }
+
+        .check-area { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 12px; margin: 10px 0; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .check-area.success { background: #f1f8e9; border: 2px dashed var(--primary); }
         
-        .heatmap-wrapper { overflow-x: auto; padding: 10px 0; }
-        .heatmap-table { border-collapse: separate; border-spacing: 3px; margin: auto; }
-        .cell { width: 18px; height: 18px; border-radius: 3px; }
+        textarea { width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; font-family: inherit; margin-top: 10px; box-sizing: border-box; resize: vertical; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-save { background: var(--primary); color: white; margin-top: 10px; }
+        .date-info { text-align: center; font-size: 0.8em; color: #666; margin-bottom: 10px; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>🌱 Gesundheitstracker</h1>
+    <div class="date-info" id="date-display">Eintrag für: Gestern</div>
 
     <div class="card">
         <h2>🎯 Atomic Habit Fokus</h2>
         <div id="habit-editor" style="display: none;">
             <div class="habit-input-group">
                 <label>Dein Ziel (habitGoal):</label>
-                <input type="text" id="h-goal" placeholder="z.B. 10 Min. Dehnen">
-                
+                <input type="text" id="h-goal">
                 <label>Nach dieser Aktion (habitStacking):</label>
-                <input type="text" id="h-stack" placeholder="z.B. Zähneputzen">
-                
+                <input type="text" id="h-stack">
                 <label>2-Minuten-Version (habitMini):</label>
-                <input type="text" id="h-mini" placeholder="z.B. 2 Min. Dehnen">
-                
+                <input type="text" id="h-mini">
                 <label>Ort/Umgebung (habitEnvironment):</label>
-                <input type="text" id="h-env" placeholder="z.B. Wohnzimmerteppich">
-                
+                <input type="text" id="h-env">
                 <label>Dauer (Tage):</label>
                 <input type="number" id="h-duration" value="60">
             </div>
             <button class="btn" style="background:var(--accent); color:white;" onclick="lockHabit()">Plan speichern</button>
         </div>
-        
         <div id="habit-viewer">
             <div class="strategy-display">
                 <div class="countdown-badge" id="view-countdown">Tag 1</div>
                 <p><strong>Fokus:</strong> <span id="view-goal"></span></p>
                 <p><strong>Trigger:</strong> <span id="view-stack"></span></p>
-                <p><strong>Einstieg:</strong> <span id="view-mini"></span></p>
-                <p><strong>Umgebung:</strong> <span id="view-env"></span></p>
-                <p style="font-size: 0.8em; margin-top: 10px; color: var(--accent);"><i id="view-enddate"></i></p>
             </div>
-            <div class="streak-container" id="streak-dots"></div>
-            <button onclick="editHabit()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.85em; margin-top:10px; width:100%;">➔ Plan anpassen</button>
+            <button onclick="editHabit()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.85em; width:100%;">➔ Plan anpassen</button>
         </div>
     </div>
 
     <div class="card">
         <div class="grid-form" id="input-fields"></div>
         
+        <h3 style="margin-top:25px;">🤒 Krankheitsstatus</h3>
+        <div class="chip-group" id="status-box">
+            <div class="chip status-gesund selected" onclick="selectStatus(this, 'Gesund')">Gesund</div>
+            <div class="chip status-angeschlagen" onclick="selectStatus(this, 'Angeschlagen')">Angeschlagen</div>
+            <div class="chip status-krank" onclick="selectStatus(this, 'Krank')">Krank</div>
+        </div>
+
         <h3 style="margin-top:25px;">💊 Nahrungsergänzung</h3>
         <div class="chip-group" id="supp-box">
             <div class="chip" onclick="this.classList.toggle('selected')" data-id="bKomplex">B-Komplex</div>
@@ -100,41 +99,35 @@
             <div class="chip" onclick="this.classList.toggle('selected')" data-id="magnesium">Magnesium</div>
             <div class="chip" onclick="this.classList.toggle('selected')" data-id="jod">Jod</div>
             <div class="chip" onclick="this.classList.toggle('selected')" data-id="zink">Zink</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-id="budesonid" style="border-color:var(--danger)">Budesonid</div>
-            <div class="chip" onclick="this.classList.toggle('selected')" data-id="ibu" style="border-color:var(--danger)">Ibu</div>
         </div>
 
-        <div class="habit-success-area" onclick="document.getElementById('habit-check').click()">
-            <input type="checkbox" id="habit-check">
-            <span>HABIT GEWONNEN! 🏆</span>
+        <div class="check-area" onclick="toggleCheck('wakeup-check')">
+            <input type="checkbox" id="wakeup-check"> <span>Wake-up Übungen erledigt 🌅</span>
         </div>
 
-        <textarea id="daily-notes" rows="3" placeholder="Besonderheiten, Symptome, Notizen..."></textarea>
-        <button class="btn btn-save" onclick="saveAll()">Speichern & Cloud Sync</button>
-    </div>
+        <div class="check-area success" onclick="toggleCheck('habit-check')">
+            <input type="checkbox" id="habit-check"> <span><strong>HABIT GEWONNEN! 🏆</strong></span>
+        </div>
 
-    <div class="card">
-        <h2>Trend (14 Tage)</h2>
-        <div class="heatmap-wrapper" id="heatmap-container"></div>
+        <textarea id="daily-notes" rows="3" placeholder="Notizen..."></textarea>
+        <button class="btn btn-save" onclick="saveAll()">Speichern für Gestern</button>
     </div>
 </div>
 
 <script>
-// Kategorien und Beschreibungen basierend auf den Bildern mit korrigierter Rechtschreibung
-const categories = [
-    { id: 'ern', name: 'Ernährung', steps: { 1: 'Sehr ungesund', 4: 'Eher ungesund (viel Gluten, viel Brot, wenig Gemüse)', 6: 'Gesund mit Einschränkungen', 8: 'Sehr gesund (viel Gemüse, kein Gluten)', 10: 'Optimal (viel Gemüse, vegetarisch, kein Gluten, keine Laktose)' } },
-    { id: 'alk', name: 'Alkohol', steps: { 1: 'Exzess mit Kater', 2: '> 5 Bier/ Wein/ starker Alkohol', 4: '> 2 Bier/ Wein', 7: '1-2 Bier/ Wein', 10: '0,0 (Nichts)' } },
-    { id: 'zuc', name: 'Zucker', steps: { 1: 'Overkill', 4: 'Viel Zucker (Fruchtzucker und industrieller Zucker)', 6: 'Wenig Zucker (ggf. etwas industrieller Zucker)', 8: 'Sehr wenig Zucker', 10: '0,0 (kein industrieller Zucker und sehr wenig Fruchtzucker)' } },
-    { id: 'spo', name: 'Sport', steps: { 1: 'Kein Sport und nur am Schreibtisch', 3: 'Nur Alltagsbewegung', 5: 'Kein Sport, aber viel Bewegung', 8: 'Sport (nur aerober Anteil)', 10: 'Intensiver Sport (mit anaerobem Anteil)' } },
-    { id: 'sch', name: 'Schlaf', steps: { 1: '< 6 Stunden guter Schlaf mit Unterbrechungen', 3: '< 7 Stunden guter Schlaf mit Unterbrechungen', 5: 'Ca. 7 Stunden guter Schlaf, aber mit Unterbrechungen', 7: 'Ca. 7 Stunden guter, ununterbrochener Schlaf', 10: '> 8 Stunden guter, ununterbrochener Schlaf' } },
-    { id: 'med', name: 'Meditation', steps: { 1: 'Keine', 4: 'Ca. 10 Minuten Meditation oder innerliche Ruhe/ Achtsamkeit mit wenigen oder keinen Unterbrechungen', 7: '15 Minuten Meditation mit wenigen oder keinen Unterbrechungen', 10: '> 20 Minuten Meditation ohne Unterbrechungen' } },
-    { id: 'ene', name: 'Energie', steps: { 1: 'Burnout-Gefühl', 3: 'Sehr müde und erschöpft', 4: 'Leicht müde und etwas erschöpft', 6: 'Ok (Durchschnitt, etwas müde)', 8: 'Leicht über Durchschnitt und aktiv', 10: 'Peak (Bäume ausreißen)' } },
-    { id: 'men', name: 'Mental', steps: { 1: 'Sehr schlecht bis hin zu depressiven Zügen', 2: 'Trübe Gedanken', 3: 'Gestresst', 4: 'Angespannt bis labil', 6: 'Ausgeglichen und stabil', 8: 'Motiviert', 10: 'Zen (Glücklich)' } },
-    { id: 'fas', name: 'Fasten', steps: { 1: 'Daueressen', 3: 'Kein Fasten, aber normale Mahlzeiten (mit Snacken)', 5: 'Kein Fasten, aber normale Mahlzeiten (ohne Snacken)', 8: '14:10', 10: '16:08' } },
-    { id: 'aut', name: 'Autoimmun', steps: { 1: 'Darmprobleme, Antriebslos und weitere Schübe', 3: 'Mehr als 1 Symptom (Haare, Darm, etc.)', 5: '1 Symptom aber kaum spürbar', 10: 'Ruhe (Keine Symptome)' } }
-];
+let currentStatus = "Gesund";
+const SCRIPT_URL = "DEINE_URL_HIER";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA223vOvb5Q-8NUQdCm-pdEaG0NyN-fFeD3z9MxO9AXG6uln43yL66fv6GGemAVNZs/exec";
+const categories = [
+    { id: 'ern', name: 'Ernährung', steps: { 1: 'Sehr ungesund', 4: 'Eher ungesund (Viel Gluten/Brot)', 8: 'Sehr gesund (kein Gluten)', 10: 'Optimal (Gemüse/Vegetarisch)' } },
+    { id: 'alk', name: 'Alkohol', steps: { 1: 'Exzess', 4: '> 2 Einheiten', 7: '1-2 Einheiten', 10: '0,0' } },
+    { id: 'zuc', name: 'Zucker', steps: { 1: 'Overkill', 6: 'Wenig', 10: '0,0' } },
+    { id: 'spo', name: 'Sport', steps: { 1: 'Keiner', 5: 'Viel Bewegung', 10: 'Intensiv' } },
+    { id: 'sch', name: 'Schlaf', steps: { 1: '< 6h', 5: '7h (unruhig)', 10: '> 8h (tief)' } },
+    { id: 'ene', name: 'Energie', steps: { 1: 'Erschöpft', 6: 'Ok', 10: 'Peak' } },
+    { id: 'men', name: 'Mental', steps: { 1: 'Schlecht', 6: 'Stabil', 10: 'Zen' } },
+    { id: 'fas', name: 'Fasten', steps: { 1: 'Snacken', 8: '14:10', 10: '16:08' } }
+];
 
 function init() {
     const container = document.getElementById('input-fields');
@@ -148,7 +141,21 @@ function init() {
     });
     const h = JSON.parse(localStorage.getItem('atomicHabit'));
     if(h) fillHabitViewer(h); else editHabit();
-    renderHabitStreak(); renderHeatmap();
+    
+    // Datums-Info anzeigen
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    document.getElementById('date-display').innerText = "Eintrag für: " + yesterday.toLocaleDateString('de-DE');
+}
+
+function selectStatus(elem, status) {
+    document.querySelectorAll('#status-box .chip').forEach(c => c.classList.remove('selected'));
+    elem.classList.add('selected');
+    currentStatus = status;
+}
+
+function toggleCheck(id) {
+    const c = document.getElementById(id);
+    c.checked = !c.checked;
 }
 
 function updateUI(id) {
@@ -156,24 +163,14 @@ function updateUI(id) {
     document.getElementById('v-' + id).innerText = val;
     const cat = categories.find(c => c.id === id);
     let bestMatch = "";
-    const sortedKeys = Object.keys(cat.steps).map(Number).sort((a, b) => a - b);
-    for (let key of sortedKeys) { if (val >= key) bestMatch = cat.steps[key]; }
+    const keys = Object.keys(cat.steps).map(Number).sort((a,b) => a-b);
+    for (let k of keys) { if (val >= k) bestMatch = cat.steps[k]; }
     document.getElementById('d-' + id).innerText = bestMatch;
 }
 
 function lockHabit() {
-    const duration = parseInt(document.getElementById('h-duration').value) || 60;
-    const start = new Date(); const end = new Date();
-    end.setDate(start.getDate() + duration - 1);
-    const h = { 
-        goal: document.getElementById('h-goal').value, 
-        stack: document.getElementById('h-stack').value,
-        mini: document.getElementById('h-mini').value,
-        env: document.getElementById('h-env').value,
-        startDate: start.toISOString().split('T')[0], 
-        endDate: end.toISOString().split('T')[0], 
-        duration: duration 
-    };
+    const start = new Date(); const dur = parseInt(document.getElementById('h-duration').value) || 60;
+    const h = { goal: document.getElementById('h-goal').value, stack: document.getElementById('h-stack').value, mini: document.getElementById('h-mini').value, env: document.getElementById('h-env').value, startDate: start.toISOString().split('T')[0], duration: dur };
     localStorage.setItem('atomicHabit', JSON.stringify(h));
     fillHabitViewer(h);
     document.getElementById('habit-editor').style.display = 'none';
@@ -181,14 +178,6 @@ function lockHabit() {
 }
 
 function editHabit() {
-    // Wenn angepasst werden soll, fülle die Felder mit den aktuellen Werten vor
-    const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
-    document.getElementById('h-goal').value = h.goal || "";
-    document.getElementById('h-stack').value = h.stack || "";
-    document.getElementById('h-mini').value = h.mini || "";
-    document.getElementById('h-env').value = h.env || "";
-    document.getElementById('h-duration').value = h.duration || 60;
-
     document.getElementById('habit-editor').style.display = 'block';
     document.getElementById('habit-viewer').style.display = 'none';
 }
@@ -196,72 +185,32 @@ function editHabit() {
 function fillHabitViewer(h) {
     document.getElementById('view-goal').innerText = h.goal || "-";
     document.getElementById('view-stack').innerText = h.stack || "-";
-    document.getElementById('view-mini').innerText = h.mini || "-";
-    document.getElementById('view-env').innerText = h.env || "-";
-    const start = new Date(h.startDate); const today = new Date();
-    const diffDays = Math.ceil(Math.abs(today - start) / (1000 * 60 * 60 * 24)) || 1;
-    document.getElementById('view-countdown').innerText = `Tag ${diffDays} von ${h.duration}`;
-    document.getElementById('view-enddate').innerText = `Zieltag: ${new Date(h.endDate).toLocaleDateString('de-DE')}`;
+    const start = new Date(h.startDate);
+    const diff = Math.ceil(Math.abs(new Date() - start) / (1000 * 60 * 60 * 24)) || 1;
+    document.getElementById('view-countdown').innerText = `Tag ${diff} von ${h.duration}`;
 }
 
 function saveAll() {
-    const today = new Date().toISOString().split('T')[0];
+    // DATUMS-LOGIK: Heute - 1 Tag
+    const dateObj = new Date();
+    dateObj.setDate(dateObj.getDate() - 1);
+    const targetDate = dateObj.toISOString().split('T')[0];
+
     const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
-    
     const entry = { 
-        date: today, 
-        habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN", 
+        date: targetDate, 
+        krankheitsStatus: currentStatus,
+        habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN",
+        wakeupUebungen: document.getElementById('wakeup-check').checked ? "JA" : "NEIN",
         habitGoal: h.goal || "",
-        habitStacking: h.stack || "",
-        habitMini: h.mini || "",
-        habitEnvironment: h.env || "",
         notes: document.getElementById('daily-notes').value 
     };
     
     document.querySelectorAll('#supp-box .chip').forEach(c => entry[c.dataset.id] = c.classList.contains('selected') ? "X" : "");
     categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
     
-    let local = JSON.parse(localStorage.getItem('healthTrack') || '[]');
-    const idx = local.findIndex(d => d.date === today);
-    if(idx > -1) local[idx] = entry; else local.unshift(entry);
-    localStorage.setItem('healthTrack', JSON.stringify(local));
-    
-    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) }).then(() => { 
-        alert("Daten gespeichert!"); 
-        renderHabitStreak(); renderHeatmap();
-    });
-}
-
-function renderHabitStreak() {
-    const container = document.getElementById('streak-dots'); container.innerHTML = "";
-    const data = JSON.parse(localStorage.getItem('healthTrack') || '[]');
-    const now = new Date();
-    for (let i = 1; i <= 31; i++) {
-        const dot = document.createElement('div'); dot.className = 'dot';
-        const dStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-        if(data.find(e => e.date === dStr && e.habitSuccess === "JA")) dot.classList.add('active');
-        if(i === now.getDate()) dot.classList.add('today');
-        container.appendChild(dot);
-    }
-}
-
-function renderHeatmap() {
-    const data = JSON.parse(localStorage.getItem('healthTrack') || '[]');
-    const container = document.getElementById('heatmap-container');
-    const dates = []; for(let i=13; i>=0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toISOString().split('T')[0]); }
-    let html = '<table class="heatmap-table"><tr><th></th>';
-    dates.forEach(d => html += `<th style="font-size:0.6em">${d.split('-')[2]}</th>`);
-    html += '</tr>';
-    categories.forEach(cat => {
-        html += `<tr><td style="font-size:0.6em; padding-right:5px;">${cat.name}</td>`;
-        dates.forEach(date => {
-            const val = data.find(e => e.date === date)?.[cat.name];
-            let color = '#eee'; if(val) color = val <= 3 ? '#f87171' : (val <= 7 ? '#fbbf24' : '#22c55e');
-            html += `<td class="cell" style="background:${color}"></td>`;
-        });
-        html += '</tr>';
-    });
-    container.innerHTML = html + '</table>';
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) })
+    .then(() => alert("Erfolgreich für gestern (" + targetDate + ") gespeichert!"));
 }
 init();
 </script>
