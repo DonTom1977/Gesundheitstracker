@@ -27,13 +27,12 @@
         .category { padding: 8px; border-bottom: 1px solid #f0f0f0; }
         .cat-header { display: flex; justify-content: space-between; font-weight: bold; }
         .score-box { background: #e8f5e9; color: var(--primary); padding: 2px 8px; border-radius: 5px; }
-        .desc-text { font-size: 0.72em; color: #555; font-style: italic; min-height: 3.5em; margin-top: 2px; line-height: 1.25; }
+        .desc-text { font-size: 0.72em; color: #555; font-style: italic; min-height: 4em; margin-top: 2px; line-height: 1.2; }
         input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
 
         .chip-group { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; }
         .chip { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.85em; cursor: pointer; background: #fff; transition: 0.2s; user-select: none; }
         .chip.selected { background: var(--primary); color: white; border-color: var(--primary); }
-        
         .chip.status-angeschlagen.selected { background: var(--warn); border-color: var(--warn); }
         .chip.status-krank.selected { background: var(--danger); border-color: var(--danger); }
 
@@ -42,7 +41,7 @@
         
         textarea { width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; font-family: inherit; margin-top: 10px; box-sizing: border-box; resize: vertical; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-save { background: var(--primary); color: white; margin-top: 10px; }
+        .btn-save { background: var(--primary); color: white; margin-top: 10px; box-shadow: 0 4px 10px rgba(46,125,50,0.3); }
         .date-info { text-align: center; font-size: 0.8em; color: #666; margin-bottom: 10px; font-style: italic; }
     </style>
 </head>
@@ -50,7 +49,7 @@
 
 <div class="container">
     <h1>🌱 Gesundheitstracker</h1>
-    <div class="date-info" id="date-display">Lade Datum...</div>
+    <div class="date-info" id="date-display">Eintrag für: Gestern</div>
 
     <div class="card">
         <h2>🎯 Atomic Habit Fokus</h2>
@@ -122,7 +121,7 @@
 <script>
 let currentStatus = "Gesund";
 let currentAutoimmun = "Nein";
-const SCRIPT_URL = "DEINE_URL_HIER";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA223vOvb5Q-8NUQdCm-pdEaG0NyN-fFeD3z9MxO9AXG6uln43yL66fv6GGemAVNZs/exec";
 
 const categories = [
     { id: 'ern', name: 'Ernährung', steps: { 1: 'Sehr ungesund', 4: 'Eher ungesund (viel Gluten, viel Brot, wenig Gemüse)', 6: 'Gesund mit Einschränkungen', 8: 'Sehr gesund (viel Gemüse, kein Gluten)', 10: 'Optimal (viel Gemüse, vegetarisch, kein Gluten, keine Laktose)' } },
@@ -198,7 +197,7 @@ function fillHabitViewer(h) {
 
 function saveAll() {
     const dateObj = new Date(); dateObj.setDate(dateObj.getDate() - 1);
-    const targetDate = dateObj.toISOString().split('T')[0];
+    const targetDate = dateObj.toLocaleDateString('de-DE');
     const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
 
     const entry = { 
