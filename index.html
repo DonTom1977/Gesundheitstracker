@@ -114,7 +114,7 @@
         </div>
 
         <textarea id="daily-notes" rows="3" placeholder="Notizen..."></textarea>
-        <button class="btn btn-save" onclick="saveAll()">Speichern für Gestern</button>
+        <button class="btn btn-save" onclick="">Speichern für Gestern</button>
     </div>
 </div>
 
@@ -196,19 +196,36 @@ function fillHabitViewer(h) {
 }
 
 function saveAll() {
-    const dateObj = new Date(); dateObj.setDate(dateObj.getDate() - 1);
+    const dateObj = new Date(); 
+    dateObj.setDate(dateObj.getDate() - 1);
     const targetDate = dateObj.toLocaleDateString('de-DE');
+    
+    // Wir holen uns den kompletten Plan aus dem Speicher
     const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
 
+    // Hier fügen wir die fehlenden Felder hinzu:
     const entry = { 
         date: targetDate, 
         krankheitsStatus: currentStatus,
         autoimmunStatus: currentAutoimmun,
         habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN",
         wakeupUebungen: document.getElementById('wakeup-check').checked ? "JA" : "NEIN",
+        
+        // Diese Namen müssen exakt so in deinem Worksheet oben stehen:
         habitGoal: h.goal || "",
+        habitStacking: h.stack || "",
+        habitMini: h.mini || "",
+        habitEnvironment: h.env || "",
+        
         notes: document.getElementById('daily-notes').value 
     };
+    
+    document.querySelectorAll('#supp-box .chip').forEach(c => entry[c.dataset.id] = c.classList.contains('selected') ? "X" : "");
+    categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
+    
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) })
+    .then(() => alert("Gespeichert für gestern (" + targetDate + ")"));
+};
     
     document.querySelectorAll('#supp-box .chip').forEach(c => entry[c.dataset.id] = c.classList.contains('selected') ? "X" : "");
     categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
