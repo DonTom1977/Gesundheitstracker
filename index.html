@@ -34,8 +34,6 @@
         .chip { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.85em; cursor: pointer; background: #fff; transition: 0.2s; user-select: none; }
         .chip.selected { background: var(--primary); color: white; border-color: var(--primary); }
         
-        /* Krankheits-Status Farben */
-        .chip.status-gesund.selected { background: var(--primary); }
         .chip.status-angeschlagen.selected { background: var(--warn); border-color: var(--warn); }
         .chip.status-krank.selected { background: var(--danger); border-color: var(--danger); }
 
@@ -52,7 +50,7 @@
 
 <div class="container">
     <h1>🌱 Gesundheitstracker</h1>
-    <div class="date-info" id="date-display">Eintrag für: Gestern</div>
+    <div class="date-info" id="date-display">Lade Datum...</div>
 
     <div class="card">
         <h2>🎯 Atomic Habit Fokus</h2>
@@ -84,11 +82,18 @@
     <div class="card">
         <div class="grid-form" id="input-fields"></div>
         
+        <h3 style="margin-top:25px;">🩺 Autoimmun (Aktivität)</h3>
+        <div class="chip-group" id="autoimmun-box">
+            <div class="chip selected" onclick="selectChip('autoimmun', this, 'Nein')">Nein</div>
+            <div class="chip status-angeschlagen" onclick="selectChip('autoimmun', this, 'Leicht')">Leicht</div>
+            <div class="chip status-krank" onclick="selectChip('autoimmun', this, 'Stark')">Stark</div>
+        </div>
+
         <h3 style="margin-top:25px;">🤒 Krankheitsstatus</h3>
         <div class="chip-group" id="status-box">
-            <div class="chip status-gesund selected" onclick="selectStatus(this, 'Gesund')">Gesund</div>
-            <div class="chip status-angeschlagen" onclick="selectStatus(this, 'Angeschlagen')">Angeschlagen</div>
-            <div class="chip status-krank" onclick="selectStatus(this, 'Krank')">Krank</div>
+            <div class="chip selected" onclick="selectChip('status', this, 'Gesund')">Gesund</div>
+            <div class="chip status-angeschlagen" onclick="selectChip('status', this, 'Angeschlagen')">Angeschlagen</div>
+            <div class="chip status-krank" onclick="selectChip('status', this, 'Krank')">Krank</div>
         </div>
 
         <h3 style="margin-top:25px;">💊 Nahrungsergänzung</h3>
@@ -116,17 +121,19 @@
 
 <script>
 let currentStatus = "Gesund";
+let currentAutoimmun = "Nein";
 const SCRIPT_URL = "DEINE_URL_HIER";
 
 const categories = [
-    { id: 'ern', name: 'Ernährung', steps: { 1: 'Sehr ungesund', 4: 'Eher ungesund (Viel Gluten/Brot)', 8: 'Sehr gesund (kein Gluten)', 10: 'Optimal (Gemüse/Vegetarisch)' } },
-    { id: 'alk', name: 'Alkohol', steps: { 1: 'Exzess', 4: '> 2 Einheiten', 7: '1-2 Einheiten', 10: '0,0' } },
-    { id: 'zuc', name: 'Zucker', steps: { 1: 'Overkill', 6: 'Wenig', 10: '0,0' } },
-    { id: 'spo', name: 'Sport', steps: { 1: 'Keiner', 5: 'Viel Bewegung', 10: 'Intensiv' } },
-    { id: 'sch', name: 'Schlaf', steps: { 1: '< 6h', 5: '7h (unruhig)', 10: '> 8h (tief)' } },
-    { id: 'ene', name: 'Energie', steps: { 1: 'Erschöpft', 6: 'Ok', 10: 'Peak' } },
-    { id: 'men', name: 'Mental', steps: { 1: 'Schlecht', 6: 'Stabil', 10: 'Zen' } },
-    { id: 'fas', name: 'Fasten', steps: { 1: 'Snacken', 8: '14:10', 10: '16:08' } }
+    { id: 'ern', name: 'Ernährung', steps: { 1: 'Sehr ungesund', 4: 'Eher ungesund (viel Gluten, viel Brot, wenig Gemüse)', 6: 'Gesund mit Einschränkungen', 8: 'Sehr gesund (viel Gemüse, kein Gluten)', 10: 'Optimal (viel Gemüse, vegetarisch, kein Gluten, keine Laktose)' } },
+    { id: 'alk', name: 'Alkohol', steps: { 1: 'Exzess mit Kater', 2: '> 5 Bier/ Wein/ starker Alkohol', 4: '> 2 Bier/ Wein', 7: '1-2 Bier/ Wein', 10: '0,0 (Nichts)' } },
+    { id: 'zuc', name: 'Zucker', steps: { 1: 'Overkill', 4: 'Viel Zucker (Fruchtzucker und industrieller Zucker)', 6: 'Wenig Zucker (ggf. etwas industrieller Zucker)', 8: 'Sehr wenig Zucker', 10: '0,0 (kein industrieller Zucker und sehr wenig Fruchtzucker)' } },
+    { id: 'spo', name: 'Sport', steps: { 1: 'Kein Sport und nur am Schreibtisch', 3: 'Nur Alltagsbewegung', 5: 'Kein Sport, aber viel Bewegung', 8: 'Sport (nur aerober Anteil)', 10: 'Intensiver Sport (mit anaerobem Anteil)' } },
+    { id: 'sch', name: 'Schlaf', steps: { 1: '< 6 Stunden guter Schlaf mit Unterbrechungen', 3: '< 7 Stunden guter Schlaf mit Unterbrechungen', 5: 'Ca. 7 Stunden guter Schlaf, aber mit Unterbrechungen', 7: 'Ca. 7 Stunden guter, ununterbrochener Schlaf', 10: '> 8 Stunden guter, ununterbrochener Schlaf' } },
+    { id: 'med', name: 'Meditation', steps: { 1: 'Keine', 4: 'Ca. 10 Minuten Meditation oder innerliche Ruhe/ Achtsamkeit mit wenigen oder keinen Unterbrechungen', 7: '15 Minuten Meditation mit wenigen oder keinen Unterbrechungen', 10: '> 20 Minuten Meditation ohne Unterbrechungen' } },
+    { id: 'ene', name: 'Energie', steps: { 1: 'Burnout-Gefühl', 3: 'Sehr müde und erschöpft', 4: 'Leicht müde und etwas erschöpft', 6: 'Ok (Durchschnitt, etwas müde)', 8: 'Leicht über Durchschnitt und aktiv', 10: 'Peak (Bäume ausreißen)' } },
+    { id: 'men', name: 'Mental', steps: { 1: 'Sehr schlecht bis hin zu depressiven Zügen', 2: 'Trübe Gedanken', 3: 'Gestresst', 4: 'Angespannt bis labil', 6: 'Ausgeglichen und stabil', 8: 'Motiviert', 10: 'Zen (Glücklich)' } },
+    { id: 'fas', name: 'Fasten', steps: { 1: 'Daueressen', 3: 'Kein Fasten, aber normale Mahlzeiten (mit Snacken)', 5: 'Kein Fasten, aber normale Mahlzeiten (ohne Snacken)', 8: '14:10', 10: '16:08' } }
 ];
 
 function init() {
@@ -142,20 +149,19 @@ function init() {
     const h = JSON.parse(localStorage.getItem('atomicHabit'));
     if(h) fillHabitViewer(h); else editHabit();
     
-    // Datums-Info anzeigen
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
     document.getElementById('date-display').innerText = "Eintrag für: " + yesterday.toLocaleDateString('de-DE');
 }
 
-function selectStatus(elem, status) {
-    document.querySelectorAll('#status-box .chip').forEach(c => c.classList.remove('selected'));
+function selectChip(type, elem, value) {
+    const boxId = type === 'status' ? '#status-box' : '#autoimmun-box';
+    document.querySelectorAll(boxId + ' .chip').forEach(c => c.classList.remove('selected'));
     elem.classList.add('selected');
-    currentStatus = status;
+    if(type === 'status') currentStatus = value; else currentAutoimmun = value;
 }
 
 function toggleCheck(id) {
-    const c = document.getElementById(id);
-    c.checked = !c.checked;
+    const c = document.getElementById(id); c.checked = !c.checked;
 }
 
 function updateUI(id) {
@@ -191,15 +197,14 @@ function fillHabitViewer(h) {
 }
 
 function saveAll() {
-    // DATUMS-LOGIK: Heute - 1 Tag
-    const dateObj = new Date();
-    dateObj.setDate(dateObj.getDate() - 1);
+    const dateObj = new Date(); dateObj.setDate(dateObj.getDate() - 1);
     const targetDate = dateObj.toISOString().split('T')[0];
-
     const h = JSON.parse(localStorage.getItem('atomicHabit') || '{}');
+
     const entry = { 
         date: targetDate, 
         krankheitsStatus: currentStatus,
+        autoimmunStatus: currentAutoimmun,
         habitSuccess: document.getElementById('habit-check').checked ? "JA" : "NEIN",
         wakeupUebungen: document.getElementById('wakeup-check').checked ? "JA" : "NEIN",
         habitGoal: h.goal || "",
@@ -210,7 +215,7 @@ function saveAll() {
     categories.forEach(cat => entry[cat.name] = document.getElementById('i-' + cat.id).value);
     
     fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) })
-    .then(() => alert("Erfolgreich für gestern (" + targetDate + ") gespeichert!"));
+    .then(() => alert("Gespeichert für gestern (" + targetDate + ")"));
 }
 init();
 </script>
